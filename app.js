@@ -68,7 +68,7 @@ console.log(current.map((el) => el.PublicIpAddress))
 // ~ variables
 let i = 0,
   ready = false,
-  create = false,
+  create = true,
   next = []
 
 // ~ constants
@@ -114,9 +114,9 @@ app.get('/', async (req, res) => {
   }
 
   // ~ create next pool of proxies
-  if (!create) {
+  if (create) {
     console.log('Creating proxies!')
-    create = true
+    create = false
     await ec2Client.send(new AWS.RunInstancesCommand(instanceParams()))
     next = await getAll()
     next = next.map((el) => {
@@ -142,7 +142,7 @@ app.get('/', async (req, res) => {
     if (current.length !== next.length) {
       await terminateInstances(next.map((el) => el.InstanceId))
       next = []
-      create = false
+      create = true
     }
   }
 
