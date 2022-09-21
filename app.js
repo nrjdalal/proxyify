@@ -1,4 +1,4 @@
-import { ec2Client, instanceParams, requestPerProxy } from './config.js'
+import { ec2Client, excludeInstance, instanceParams, requestPerProxy } from './config.js'
 import * as AWS from '@aws-sdk/client-ec2'
 import express from 'express'
 import fetch from 'node-fetch'
@@ -22,6 +22,7 @@ const getAll = async () => {
     .filter((el) => el.State.Name !== 'terminated')
     .filter((el) => el.State.Name !== 'stopping')
     .filter((el) => el.State.Name !== 'stopped')
+    .filter((el) => el.InstanceId !== excludeInstance)
   if (allInstances.filter((el) => el.PublicIpAddress === undefined).length !== 0) {
     return await getAll()
   }
