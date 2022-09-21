@@ -35,7 +35,7 @@ const terminateInstances = async (InstanceIds) => {
 
 // ~ fx -> fetch request with a default timeout of 5s
 const fetchTimeout = async (resource, options = {}) => {
-  const { timeout = 5000 } = options
+  const { timeout = 15000 } = options
   const controller = new AbortController()
   const id = setTimeout(() => controller.abort(), timeout)
   const response = await fetch(resource, {
@@ -140,6 +140,7 @@ app.get('/', async (req, res) => {
     )
     if (current.length !== next.length) {
       await terminateInstances(next.map((el) => el.InstanceId))
+      next = []
       create = false
     }
   }
