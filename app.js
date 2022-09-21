@@ -99,10 +99,10 @@ app.get('/', async (req, res) => {
   // ~ proxy pool switcher before proceeding to next request i.e. next -> current
   if (i % switchProxies === 0) {
     console.log('Switching proxies!')
-    create = false
     await terminateInstances(current.map((el) => el.InstanceId))
     current = next
     next = []
+    create = true
   }
 
   // ~ main request logic
