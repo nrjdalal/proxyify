@@ -34,6 +34,9 @@ const terminateInstances = async (InstanceIds) => {
   return await ec2Client.send(new AWS.TerminateInstancesCommand({ InstanceIds: InstanceIds }))
 }
 
+// ~ fx -> sleep
+const sleep = (ms = 1000) => new Promise((res) => setTimeout(res, ms))
+
 // ~ fx -> fetch request with a default timeout of 5s
 const fetchTimeout = async (resource, options = {}) => {
   const { timeout = 15000 } = options
@@ -50,19 +53,23 @@ const fetchTimeout = async (resource, options = {}) => {
 // ~ getting all pending and running instances
 console.log('getting all pending and running instances')
 const allInstances = await getAll()
+await sleep()
 
 // ~ terminating all existing instances
 if (allInstances.length !== 0) {
   console.log('terminating all existing instances')
   await terminateInstances(allInstances.map((el) => el.InstanceId))
+  await sleep()
 }
 
 // ~ starting primary instances
 console.log('starting primary instances')
 await ec2Client.send(new AWS.RunInstancesCommand(instanceParams()))
+await sleep()
 
 // ~ associating primary instances with current
 let current = await getAll()
+await sleep()
 console.log(current.map((el) => el.PublicIpAddress))
 
 // ~ variables
@@ -104,6 +111,7 @@ app.get('/', async (req, res) => {
   if (i % switchProxies === 0) {
     console.log('Switching proxies!')
     await terminateInstances(current.map((el) => el.InstanceId))
+    await sleep()
     current = next
     next = []
     create = true
@@ -122,7 +130,9 @@ app.get('/', async (req, res) => {
     console.log('Creating proxies!')
     create = false
     await ec2Client.send(new AWS.RunInstancesCommand(instanceParams()))
+    await sleep()
     next = await getAll()
+    await sleep()
     next = next.map((el) => {
       let flag = 0
       current.forEach((id) => {
@@ -146,6 +156,8 @@ app.get('/', async (req, res) => {
 
     if (current.length !== next.length) {
       await terminateInstances(next.map((el) => el.InstanceId))
+      await sleep()
+      next = []
       create = true
     }
   }
