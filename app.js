@@ -80,7 +80,11 @@ app.get('/', async (req, res) => {
 
   // ~ currently active proxy
   const proxy = current[i % current.length].PublicIpAddress
-  console.log(i, proxy)
+
+  // ~ logging every 10th request
+  if (!ready || i % 20 === 0) {
+    console.log(i, proxy)
+  }
 
   // ~ checking server status
   if (!ready) {
