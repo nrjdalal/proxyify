@@ -1,7 +1,9 @@
-import { ec2Client, excludeInstance, instanceParams, requestPerProxy } from './config.js'
+import { ec2Client, excludeInstance, instanceParams, masterServer, requestPerProxy } from './config.js'
 import * as AWS from '@aws-sdk/client-ec2'
 import express from 'express'
 import fetch from 'node-fetch'
+import HttpsProxyAgent from 'https-proxy-agent'
+
 const app = express()
 
 // ~ fx -> get all pending and running instances
@@ -99,11 +101,11 @@ app.get('/', async (req, res) => {
       i = 0
     }
     try {
-      await fetchTimeout(`http://${proxy}/?url=https://google.com`)
+      const proxyAgent = new HttpsProxyAgent(`http://${proxy}:3128`)
+      await fetchTimeout('https://google.com', { agent: proxyAgent })
       ready = true
       i = 0
       res.send('Server is ready!')
-
       return
     } catch {
       res.send('Server is booting up!')
@@ -124,7 +126,18 @@ app.get('/', async (req, res) => {
 
   // ~ main request logic
   try {
-    const response = await fetchTimeout(`http://${proxy}/?url=${req.query.url}`)
+    const proxyAgent = new HttpsProxyAgent(`http://${proxy}:3128`)
+    const response = await fetchTimeout(req.query.url, {
+      agent: proxyAgent,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:105.0) Gecko/20100101 Firefox/105.0',
+        Accept: 'text/html,*/*',
+        'Accept-Language': 'en- US, en; q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Content-Type': 'application/json',
+        Connection: 'keep-alive',
+      },
+    })
     res.status(200).send(await response.text())
   } catch {
     res.status(408).send(`Request Timeout!`)

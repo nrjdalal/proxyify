@@ -5,7 +5,7 @@ import fs from 'fs'
 const getData = async (asin, i = 0) => {
   const start = performance.now()
   let url = 'localhost:5555'
-  url = '18.212.82.10'
+  // url = '18.212.82.10'
 
   try {
     let res = await fetch(`http://${url}/?url=https://amazon.com/dp/${asin}`, {
@@ -55,7 +55,7 @@ const getData = async (asin, i = 0) => {
       writer.write(`${data.meta.index} @ ${data.meta.url} ~ Unsuccessful` + '\n')
       await getData(asin, i)
     } else {
-      console.log(`${data.meta.index} ${timeTaken}`)
+      console.log(`${data.meta.index} ${data.name.slice(0, 5)} ${timeTaken}`)
       writer.write(`${data.meta.index}` + '\n')
     }
   } catch {
@@ -72,32 +72,33 @@ fs.writeFile('./tests/logs.txt', '', (err) => {
 
 const writer = fs.createWriteStream(`./tests/logs.txt`, { flags: 'a' })
 
-// const timer = (ms) => new Promise((res) => setTimeout(res, ms))
+const timer = (ms) => new Promise((res) => setTimeout(res, ms))
 
 let i = 0
 
 async function load() {
   while (i < asins.length) {
     try {
-      // await getData(asins[i], i)
-      // await timer(750)
-      // await timer(Math.floor(Math.random() * 500))
-      await Promise.all([
-        getData(asins[i + 0], i + 0),
-        getData(asins[i + 1], i + 1),
-        getData(asins[i + 2], i + 2),
-        getData(asins[i + 3], i + 3),
-        getData(asins[i + 4], i + 4),
-        getData(asins[i + 0], i + 5),
-        getData(asins[i + 1], i + 6),
-        getData(asins[i + 2], i + 7),
-        getData(asins[i + 3], i + 8),
-        getData(asins[i + 4], i + 9),
-      ])
+      getData(asins[i], i)
+      await timer(750)
+      await timer(Math.floor(Math.random() * 500))
+      // await Promise.all([
+      //   getData(asins[i + 0], i + 0),
+      //   getData(asins[i + 1], i + 1),
+      //   getData(asins[i + 2], i + 2),
+      //   getData(asins[i + 3], i + 3),
+      //   getData(asins[i + 4], i + 4),
+      //   getData(asins[i + 0], i + 5),
+      //   getData(asins[i + 1], i + 6),
+      //   getData(asins[i + 2], i + 7),
+      //   getData(asins[i + 3], i + 8),
+      //   getData(asins[i + 4], i + 9),
+      // ])
     } catch (e) {
       console.log(e)
     }
-    i = i + 10
+    i++
+    // i = i + 10
   }
 }
 
