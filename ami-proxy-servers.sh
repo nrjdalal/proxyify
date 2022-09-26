@@ -27,13 +27,12 @@ const port = 3000
 app.get('/', async (req, res) => {
   await fetch(req.query.url, {
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:105.0) Gecko/20100101 Firefox/105.0',
       Accept: 'text/html,*/*',
       'Accept-Language': 'en- US, en; q=0.5',
       'Accept-Encoding': 'gzip, deflate, br',
       'Content-Type': 'application/json',
       Connection: 'keep-alive',
-      Referer: 'https://google.com',
     },
   }).then(async (response) => {
     res.status(200).send(await response.text())

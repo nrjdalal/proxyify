@@ -86,20 +86,24 @@ app.get('/', async (req, res) => {
   i++
 
   // ~ currently active proxy
-  const proxy = current[i % current.length].PublicIpAddress
+  let proxy = current[i % current.length].PublicIpAddress
 
-  // ~ logging every 10th request
+  // ~ logging every 20th request
   if (!ready || i % 20 === 0) {
     console.log(i, proxy)
   }
 
   // ~ checking server status
   if (!ready) {
+    if (i === 10) {
+      i = 0
+    }
     try {
       await fetchTimeout(`http://${proxy}/?url=https://google.com`)
       ready = true
       i = 0
       res.send('Server is ready!')
+
       return
     } catch {
       res.send('Server is booting up!')
@@ -113,6 +117,7 @@ app.get('/', async (req, res) => {
     await terminateInstances(current.map((el) => el.InstanceId))
     await sleep()
     current = next
+    proxy = current[i % current.length].PublicIpAddress
     next = []
     create = true
   }
