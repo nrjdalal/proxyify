@@ -1,7 +1,9 @@
-import { ec2Client, excludeInstance, instanceParams, requestPerProxy } from './config.js'
+import { ec2Client, excludeInstance, instanceParams, masterServer, requestPerProxy } from './config.js'
 import * as AWS from '@aws-sdk/client-ec2'
 import express from 'express'
 import fetch from 'node-fetch'
+import HttpsProxyAgent from 'https-proxy-agent'
+
 const app = express()
 
 // ~ fx -> get all pending and running instances
@@ -34,6 +36,27 @@ const terminateInstances = async (InstanceIds) => {
   return await ec2Client.send(new AWS.TerminateInstancesCommand({ InstanceIds: InstanceIds }))
 }
 
+// ~ fx -> create new instances
+const createInstances = async (instanceParams) => {
+  const describeAll = await ec2Client.send(new AWS.DescribeInstancesCommand({}))
+  let allInstances = []
+  describeAll.Reservations.forEach((el) => allInstances.push(...el.Instances))
+  allInstances = allInstances
+    .map((el) => {
+      return {
+        InstanceId: el.InstanceId,
+        PublicIpAddress: el.PublicIpAddress,
+        State: el.State,
+        Meta: { Info: el },
+      }
+    })
+    .filter((el) => el.State.Name === 'shutting-down')
+  if (allInstances.length !== 0) {
+    return await createInstances(instanceParams)
+  }
+  return await ec2Client.send(new AWS.RunInstancesCommand(instanceParams))
+}
+
 // ~ fx -> sleep
 const sleep = (ms = 1000) => new Promise((res) => setTimeout(res, ms))
 
@@ -64,7 +87,8 @@ if (allInstances.length !== 0) {
 
 // ~ starting primary instances
 console.log('starting primary instances')
-await ec2Client.send(new AWS.RunInstancesCommand(instanceParams()))
+// await ec2Client.send(new AWS.RunInstancesCommand(instanceParams()))
+await createInstances(instanceParams())
 await sleep()
 
 // ~ associating primary instances with current
@@ -86,11 +110,10 @@ app.get('/', async (req, res) => {
   i++
 
   // ~ currently active proxy
-  let proxy = current[i % current.length].PublicIpAddress
 
   // ~ logging every 20th request
   if (!ready || i % 20 === 0) {
-    console.log(i, proxy)
+    console.log(i, current[i % current.length].PublicIpAddress)
   }
 
   // ~ checking server status
@@ -99,11 +122,11 @@ app.get('/', async (req, res) => {
       i = 0
     }
     try {
-      await fetchTimeout(`http://${proxy}/?url=https://google.com`)
+      const proxyAgent = new HttpsProxyAgent(`http://${current[i % current.length].PublicIpAddress}:3128`)
+      await fetchTimeout('https://google.com', { agent: proxyAgent })
       ready = true
       i = 0
       res.send('Server is ready!')
-
       return
     } catch {
       res.send('Server is booting up!')
@@ -114,17 +137,26 @@ app.get('/', async (req, res) => {
   // ~ proxy pool switcher before proceeding to next request i.e. next -> current
   if (i % switchProxies === 0) {
     console.log('Switching proxies!')
-    await terminateInstances(current.map((el) => el.InstanceId))
-    await sleep()
+    terminateInstances(current.map((el) => el.InstanceId))
     current = next
-    proxy = current[i % current.length].PublicIpAddress
     next = []
     create = true
   }
 
+  const proxy = current[i % current.length].PublicIpAddress
+
   // ~ main request logic
   try {
-    const response = await fetchTimeout(`http://${proxy}/?url=${req.query.url}`)
+    const proxyAgent = new HttpsProxyAgent(`http://${proxy}:3128`)
+    const response = await fetchTimeout(req.query.url, {
+      agent: proxyAgent,
+      headers: {
+        Accept: 'text/html,*/*',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:105.0) Gecko/20100101 Firefox/105.0',
+      },
+    })
     res.status(200).send(await response.text())
   } catch {
     res.status(408).send(`Request Timeout!`)
@@ -134,8 +166,13 @@ app.get('/', async (req, res) => {
   if (create) {
     console.log('Creating proxies!')
     create = false
-    await ec2Client.send(new AWS.RunInstancesCommand(instanceParams()))
-    await sleep()
+    try {
+      // await ec2Client.send(new AWS.RunInstancesCommand(instanceParams()))
+      await createInstances(instanceParams())
+      await sleep()
+    } catch {
+      console.log('Retry later!')
+    }
     next = await getAll()
     await sleep()
     next = next.map((el) => {
