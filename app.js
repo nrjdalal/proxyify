@@ -1,4 +1,4 @@
-import { ec2Client, excludeInstance, instanceParams, masterServer, requestPerProxy } from './config.js'
+import { ec2Client, excludeInstance, instanceParams, requestPerProxy } from './config.js'
 import * as AWS from '@aws-sdk/client-ec2'
 import express from 'express'
 import fetch from 'node-fetch'
