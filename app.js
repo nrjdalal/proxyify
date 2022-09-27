@@ -167,13 +167,14 @@ app.get('/', async (req, res) => {
         images: [$('#landingImage').attr('src')],
         total_reviews: Number($('#acrCustomerReviewText').text().split(' ')[0].replace(',', '')),
         average_rating: Number($('span[data-hook=rating-out-of-text]').text().split(' ')[0]),
-        notFound:
-          $(`img[alt="Sorry! We couldn't find that page. Try searching or go to Amazon's home page."]`).attr('src') ===
-          undefined
-            ? false
-            : true,
         meta: {
           captcha: $('#captchacharacters').attr('placeholder') !== undefined ? true : false,
+          notFound:
+            $(`img[alt="Sorry! We couldn't find that page. Try searching or go to Amazon's home page."]`).attr(
+              'src'
+            ) === undefined
+              ? false
+              : true,
         },
       }
       if (data.name.length === 0) {
@@ -188,6 +189,7 @@ app.get('/', async (req, res) => {
 
   // ~ create next pool of proxies
   if (create) {
+    await sleep()
     console.log('Creating proxies!')
     create = false
     try {

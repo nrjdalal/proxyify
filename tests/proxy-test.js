@@ -5,49 +5,53 @@ import fs from 'fs'
 const getData = async (asin, i = 0) => {
   const start = performance.now()
   let url = 'localhost:5555'
-  url = '3.91.81.55'
+  // url = '3.91.81.55'
 
   try {
-    let res = await fetch(`http://${url}/?url=https://amazon.com/dp/${asin}`)
+    let res = await fetch(`http://${url}/?url=https://www.amazon.com/dp/${asin}&autoparse=true`)
 
     res = await res.text()
-    const $ = cheerio.load(res)
-    $.html()
 
-    const data = {
-      name: $('#productTitle').text().trim() || $('#btAsinTitle').text().trim(),
-      availability: $('#availability').text().trim().replace(/\s+/g, ' '), // availabilty status in alternative
-      images: [$('#landingImage').attr('src')],
-      total_reviews: Number($('#acrCustomerReviewText').text().split(' ')[0].replace(',', '')),
-      average_rating: Number($('span[data-hook=rating-out-of-text]').text().split(' ')[0]),
-      notFound:
-        $(`img[alt="Sorry! We couldn't find that page. Try searching or go to Amazon's home page."]`).attr('src') ===
-        undefined
-          ? false
-          : true,
-      meta: {
-        captcha: $('#captchacharacters').attr('placeholder') !== undefined ? true : false,
-        index: `${i}`,
-        asin,
-        url: `https://amazon.com/dp/${asin}`,
-      },
+    let data
+
+    try {
+      data = JSON.parse(res)
+    } catch {
+      const $ = cheerio.load(res)
+      $.html()
+      data = {
+        name: $('#productTitle').text().trim() || $('#btAsinTitle').text().trim(),
+        availability_status: $('#availability').text().trim().replace(/\s+/g, ' '), // availabilty status in alternative
+        images: [$('#landingImage').attr('src')],
+        total_reviews: Number($('#acrCustomerReviewText').text().split(' ')[0].replace(',', '')),
+        average_rating: Number($('span[data-hook=rating-out-of-text]').text().split(' ')[0]),
+        meta: {
+          captcha: $('#captchacharacters').attr('placeholder') !== undefined ? true : false,
+          notFound:
+            $(`img[alt="Sorry! We couldn't find that page. Try searching or go to Amazon's home page."]`).attr(
+              'src'
+            ) === undefined
+              ? false
+              : true,
+        },
+      }
     }
 
     const timeTaken = ((performance.now() - start) / 1000).toFixed(1) + 's'
     if (data.meta.captcha) {
-      console.log(`${data.meta.index} @ ${data.meta.url} ~ Captcha ${timeTaken}`)
-      // writer.write(`${data.meta.index} @ ${data.meta.url} ~ Captcha` + '\n')
+      console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Captcha ${timeTaken}`)
+      // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Captcha` + '\n')
       await getData(asin, i)
-    } else if (data.notFound) {
-      console.log(`${data.meta.index} @ ${data.meta.url} ~ Not Found ${timeTaken}`)
-      // writer.write(`${data.meta.index} @ ${data.meta.url} ~ Not Found` + '\n')
+    } else if (data.meta.notFound) {
+      console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Not Found ${timeTaken}`)
+      // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Not Found` + '\n')
     } else if (data.name.length === 0) {
-      console.log(`${data.meta.index} @ ${data.meta.url} ~ Unsuccessful ${timeTaken}`)
-      // writer.write(`${data.meta.index} @ ${data.meta.url} ~ Unsuccessful` + '\n')
+      console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Unsuccessful ${timeTaken}`)
+      // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Unsuccessful` + '\n')
       await getData(asin, i)
     } else {
-      console.log(`${data.meta.index} ${data.name.slice(0, 5)} ${timeTaken}`)
-      // writer.write(`${data.meta.index}` + '\n')
+      console.log(`${i} ${data.name.slice(0, 5)} ${timeTaken}`)
+      // writer.write(`${i}` + '\n')
     }
   } catch {
     await getData(asin, i)
@@ -71,8 +75,8 @@ async function load() {
   while (i < asins.length) {
     try {
       getData(asins[i], i)
-      await timer(750)
-      await timer(Math.floor(Math.random() * 500))
+      await timer(1000)
+      // await timer(Math.floor(Math.random() * 500))
       // await Promise.all([
       //   getData(asins[i + 0], i + 0),
       //   getData(asins[i + 1], i + 1),
