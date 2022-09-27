@@ -158,7 +158,7 @@ app.get('/', async (req, res) => {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:105.0) Gecko/20100101 Firefox/105.0',
       },
     })
-    if (req.query.url.includes('amazon')) {
+    if (req.query.url.includes('amazon') && req.query.autoparse === 'true') {
       response = await response.text()
       const $ = cheerio.load(response)
       console.log($.html())

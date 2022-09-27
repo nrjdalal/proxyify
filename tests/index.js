@@ -8,16 +8,7 @@ const getData = async (asin, i = 0) => {
   url = '3.91.81.55'
 
   try {
-    let res = await fetch(`http://${url}/?url=https://amazon.com/dp/${asin}`, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0',
-        Accept: 'text/html,*/*',
-        'Accept-Language': 'en- US, en; q=0.5',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Content-Type': 'application/json',
-        Connection: 'keep-alive',
-      },
-    })
+    let res = await fetch(`http://${url}/?url=https://amazon.com/dp/${asin}`)
 
     res = await res.text()
     const $ = cheerio.load(res)
