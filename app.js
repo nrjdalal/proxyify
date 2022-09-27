@@ -195,7 +195,6 @@ app.get('/', async (req, res) => {
       'Next',
       next.map((el) => el.PublicIpAddress)
     )
-
     if (current.length !== next.length) {
       await terminateInstances(next.map((el) => el.InstanceId))
       await sleep()
@@ -203,7 +202,6 @@ app.get('/', async (req, res) => {
       create = true
     }
   }
-
   res.end()
 })
 
