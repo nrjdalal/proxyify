@@ -1,5 +1,6 @@
 import { ec2Client, excludeInstance, instanceParams, requestPerProxy } from './config.js'
 import * as AWS from '@aws-sdk/client-ec2'
+import * as cheerio from 'cheerio'
 import express from 'express'
 import fetch from 'node-fetch'
 import HttpsProxyAgent from 'https-proxy-agent'
@@ -156,8 +157,56 @@ app.get('/', async (req, res) => {
         'Accept-Encoding': 'gzip, deflate, br',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:105.0) Gecko/20100101 Firefox/105.0',
       },
+      timeout: 15000,
     })
-    res.status(200).send(await response.text())
+    if (res.query.url.contains('amazon')) {
+      response = await response.text()
+      const $ = cheerio.load(response)
+      $.html()
+
+      const data = {
+        name: $('#productTitle').text().trim() || $('#btAsinTitle').text().trim(),
+        availability: $('#availability').text().trim().replace(/\s+/g, ' '), // availabilty status in alternative
+        images: [$('#landingImage').attr('src')],
+        total_reviews: Number($('#acrCustomerReviewText').text().split(' ')[0].replace(',', '')),
+        average_rating: Number($('span[data-hook=rating-out-of-text]').text().split(' ')[0]),
+        notFound:
+          $(`img[alt="Sorry! We couldn't find that page. Try searching or go to Amazon's home page."]`).attr('src') ===
+          undefined
+            ? false
+            : true,
+        meta: {
+          captcha: $('#captchacharacters').attr('placeholder') !== undefined ? true : false,
+          index: `${i}`,
+          asin,
+          url: `https://amazon.com/dp/${asin}`,
+        },
+      }
+
+      res.status(200).json({
+        name: data.name,
+        // product_information: {},
+        // brand: '',
+        // brand_url: null,
+        // full_description: '',
+        // pricing: '',
+        // list_price: '',
+        availability_status: data.availability,
+        images: data.images,
+        // product_category: '',
+        average_rating: data.average_rating,
+        // small_description: '',
+        // feature_bullets: [],
+        total_reviews: data.total_reviews,
+        // total_answered_questions: 0,
+        // customization_options: {},
+        // seller_id: null,
+        // seller_name: null,
+        // fulfilled_by_amazon: null,
+        // fast_track_message: '',
+        // aplus_present: false,
+      })
+    } else res.status(200).send(await response.text())
   } catch {
     res.status(408).send(`Request Timeout!`)
   }
