@@ -159,7 +159,7 @@ app.get('/', async (req, res) => {
       },
       timeout: 15000,
     })
-    if (res.query.url.contains('amazon')) {
+    if (res.query.url.includes('amazon')) {
       response = await response.text()
       const $ = cheerio.load(response)
       $.html()
