@@ -162,7 +162,6 @@ app.get('/', async (req, res) => {
       response = await response.text()
       const $ = cheerio.load(response)
       console.log($.html())
-
       const data = {
         name: $('#productTitle').text().trim() || $('#btAsinTitle').text().trim(),
         availability: $('#availability').text().trim().replace(/\s+/g, ' '), // availabilty status in alternative
@@ -176,9 +175,6 @@ app.get('/', async (req, res) => {
             : true,
         meta: {
           captcha: $('#captchacharacters').attr('placeholder') !== undefined ? true : false,
-          index: `${i}`,
-          asin,
-          url: `https://amazon.com/dp/${asin}`,
         },
       }
 
