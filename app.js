@@ -189,9 +189,9 @@ app.get('/', async (req, res) => {
 
   // ~ create next pool of proxies
   if (create) {
+    create = false
     await sleep()
     console.log('Creating proxies!')
-    create = false
     try {
       // await ec2Client.send(new AWS.RunInstancesCommand(instanceParams()))
       await createInstances(instanceParams())
