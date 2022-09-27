@@ -36,18 +36,18 @@ const getData = async (asin, i = 0) => {
     const timeTaken = ((performance.now() - start) / 1000).toFixed(1) + 's'
     if (data.meta.captcha) {
       console.log(`${data.meta.index} @ ${data.meta.url} ~ Captcha ${timeTaken}`)
-      writer.write(`${data.meta.index} @ ${data.meta.url} ~ Captcha` + '\n')
+      // writer.write(`${data.meta.index} @ ${data.meta.url} ~ Captcha` + '\n')
       await getData(asin, i)
     } else if (data.notFound) {
       console.log(`${data.meta.index} @ ${data.meta.url} ~ Not Found ${timeTaken}`)
-      writer.write(`${data.meta.index} @ ${data.meta.url} ~ Not Found` + '\n')
+      // writer.write(`${data.meta.index} @ ${data.meta.url} ~ Not Found` + '\n')
     } else if (data.name.length === 0) {
       console.log(`${data.meta.index} @ ${data.meta.url} ~ Unsuccessful ${timeTaken}`)
-      writer.write(`${data.meta.index} @ ${data.meta.url} ~ Unsuccessful` + '\n')
+      // writer.write(`${data.meta.index} @ ${data.meta.url} ~ Unsuccessful` + '\n')
       await getData(asin, i)
     } else {
       console.log(`${data.meta.index} ${data.name.slice(0, 5)} ${timeTaken}`)
-      writer.write(`${data.meta.index}` + '\n')
+      // writer.write(`${data.meta.index}` + '\n')
     }
   } catch {
     await getData(asin, i)
@@ -57,11 +57,11 @@ const getData = async (asin, i = 0) => {
 const asinsTxt = fs.readFileSync('./tests/_asins.txt', 'utf-8')
 const asins = asinsTxt.split('\n')
 
-fs.writeFile('./tests/logs.txt', '', (err) => {
-  if (err) console.log(err)
-})
+// fs.writeFile('./tests/logs.txt', '', (err) => {
+//   if (err) console.log(err)
+// })
 
-const writer = fs.createWriteStream(`./tests/logs.txt`, { flags: 'a' })
+// const writer = fs.createWriteStream(`./tests/logs.txt`, { flags: 'a' })
 
 const timer = (ms) => new Promise((res) => setTimeout(res, ms))
 
