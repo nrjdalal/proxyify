@@ -9,9 +9,9 @@ export const ec2Client = new AWS.EC2Client({
   },
 })
 
-export const excludeInstance = ''
+export const excludeInstance = '<Any-Instance-ID>'
 
-export const instanceParams = (num = 10) => {
+export const instanceParams = (num = 15) => {
   return {
     ImageId: '<Proxy-AMI-Image>',
     InstanceType: 't2.micro',
@@ -21,4 +21,4 @@ export const instanceParams = (num = 10) => {
   }
 }
 
-export const requestPerProxy = 60
+export const requestPerProxy = 100

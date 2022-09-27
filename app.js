@@ -196,7 +196,11 @@ app.get('/', async (req, res) => {
       next.map((el) => el.PublicIpAddress)
     )
     if (current.length !== next.length) {
-      await terminateInstances(next.map((el) => el.InstanceId))
+      try {
+        await terminateInstances(next.map((el) => el.InstanceId))
+      } catch {
+        console.log('No instances to remove!')
+      }
       await sleep()
       next = []
       create = true
