@@ -149,7 +149,7 @@ app.get('/', async (req, res) => {
   // ~ main request logic
   try {
     const proxyAgent = new HttpsProxyAgent(`http://${proxy}:3128`)
-    const response = await fetchTimeout(req.query.url, {
+    let response = await fetchTimeout(req.query.url, {
       agent: proxyAgent,
       headers: {
         Accept: 'text/html,*/*',
