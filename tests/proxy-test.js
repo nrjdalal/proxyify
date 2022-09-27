@@ -5,7 +5,7 @@ import fs from 'fs'
 const getData = async (asin, i = 0) => {
   const start = performance.now()
   let url = 'localhost:5555'
-  // url = '3.91.81.55'
+  url = '34.228.161.158'
 
   try {
     let res = await fetch(`http://${url}/?url=https://www.amazon.com/dp/${asin}&autoparse=true`)
