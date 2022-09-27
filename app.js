@@ -164,7 +164,7 @@ app.get('/', async (req, res) => {
       console.log($.html())
       const data = {
         name: $('#productTitle').text().trim() || $('#btAsinTitle').text().trim(),
-        availability: $('#availability').text().trim().replace(/\s+/g, ' '), // availabilty status in alternative
+        availability_status: $('#availability').text().trim().replace(/\s+/g, ' '), // availabilty status in alternative
         images: [$('#landingImage').attr('src')],
         total_reviews: Number($('#acrCustomerReviewText').text().split(' ')[0].replace(',', '')),
         average_rating: Number($('span[data-hook=rating-out-of-text]').text().split(' ')[0]),
@@ -177,8 +177,11 @@ app.get('/', async (req, res) => {
           captcha: $('#captchacharacters').attr('placeholder') !== undefined ? true : false,
         },
       }
-
-      res.status(200).json(data)
+      if (data.name.length === 0) {
+        res.status(200).send(response)
+      } else {
+        res.status(200).json(data)
+      }
     } else res.status(200).send(await response.text())
   } catch {
     res.status(408).send(`Request Timeout!`)
