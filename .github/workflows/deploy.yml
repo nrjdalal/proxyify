@@ -22,5 +22,5 @@ jobs:
       - run: sudo rm -rf $reponame
       - run: sudo git clone https://github.com/$username/$reponame.git
       - run: cd $reponame && sudo npm i
-      - run: sudo rsync -r $reponame/ $reponame-prod
+      - run: sudo rsync -r $reponame/ $reponame-prod/
       - run: sudo cp proxyify.config.js $reponame-prod/config.js
