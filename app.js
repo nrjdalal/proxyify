@@ -161,7 +161,7 @@ app.get('/', async (req, res) => {
     if (req.query.url.includes('amazon')) {
       response = await response.text()
       const $ = cheerio.load(response)
-      $.html()
+      console.log($.html())
 
       const data = {
         name: $('#productTitle').text().trim() || $('#btAsinTitle').text().trim(),
@@ -182,29 +182,7 @@ app.get('/', async (req, res) => {
         },
       }
 
-      res.status(200).json({
-        name: data.name,
-        // product_information: {},
-        // brand: '',
-        // brand_url: null,
-        // full_description: '',
-        // pricing: '',
-        // list_price: '',
-        availability_status: data.availability,
-        images: data.images,
-        // product_category: '',
-        average_rating: data.average_rating,
-        // small_description: '',
-        // feature_bullets: [],
-        total_reviews: data.total_reviews,
-        // total_answered_questions: 0,
-        // customization_options: {},
-        // seller_id: null,
-        // seller_name: null,
-        // fulfilled_by_amazon: null,
-        // fast_track_message: '',
-        // aplus_present: false,
-      })
+      res.status(200).json(data)
     } else res.status(200).send(await response.text())
   } catch {
     res.status(408).send(`Request Timeout!`)
