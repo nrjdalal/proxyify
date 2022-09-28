@@ -2,15 +2,30 @@ import * as cheerio from 'cheerio'
 import fetch from 'node-fetch'
 import fs from 'fs'
 
+// ~ fx -> fetch request with a default timeout of 5s
+const fetchTimeout = async (resource, options = {}) => {
+  const { timeout = 10000 } = options
+  const controller = new AbortController()
+  const id = setTimeout(() => controller.abort(), timeout)
+  const response = await fetch(resource, {
+    ...options,
+    signal: controller.signal,
+  })
+  clearTimeout(id)
+  return response
+}
+
+// ~ fx -> get my data
 const getData = async (asin, i = 0) => {
   const start = performance.now()
   let url = 'localhost:5555'
-  url = '34.228.161.158'
+  url = '34.233.44.182'
 
   try {
-    let res = await fetch(`http://${url}/?url=https://www.amazon.com/dp/${asin}&autoparse=true`)
+    let res = await fetchTimeout(`http://${url}/?url=https://www.amazon.com/dp/${asin}&autoparse=true`)
 
     res = await res.text()
+    console.log(res.slice(0, 50))
 
     let data
 
@@ -37,6 +52,8 @@ const getData = async (asin, i = 0) => {
       }
     }
 
+    console.log('Unsuccessful', data.meta.captcha || data.meta.notFound || !data.name.length ? true : false)
+
     const timeTaken = ((performance.now() - start) / 1000).toFixed(1) + 's'
     if (data.meta.captcha) {
       console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Captcha ${timeTaken}`)
@@ -50,7 +67,7 @@ const getData = async (asin, i = 0) => {
       // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Unsuccessful` + '\n')
       await getData(asin, i)
     } else {
-      console.log(`${i} ${data.name.slice(0, 5)} ${timeTaken}`)
+      console.log(`${i} ${data.name.slice(0, 4)} ${data.average_rating} ${data.availability_status} ${timeTaken}`)
       // writer.write(`${i}` + '\n')
     }
   } catch {
@@ -74,8 +91,9 @@ let i = 0
 async function load() {
   while (i < asins.length) {
     try {
-      getData(asins[i], i)
-      await timer(1000)
+      const start = performance.now()
+      await getData(asins[i + 90], i)
+      // await timer(1000)
       // await timer(Math.floor(Math.random() * 500))
       // await Promise.all([
       //   getData(asins[i + 0], i + 0),
@@ -89,6 +107,8 @@ async function load() {
       //   getData(asins[i + 3], i + 8),
       //   getData(asins[i + 4], i + 9),
       // ])
+      const timeTaken = ((performance.now() - start) / 1000).toFixed(1) + 's'
+      // console.log(timeTaken)
     } catch (e) {
       console.log(e)
     }

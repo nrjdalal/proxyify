@@ -177,11 +177,8 @@ app.get('/', async (req, res) => {
               : true,
         },
       }
-      if (data.name.length === 0) {
-        res.status(200).send(response)
-      } else {
-        res.status(200).json(data)
-      }
+
+      res.status(200).json(data)
     } else res.status(200).send(await response.text())
   } catch {
     res.status(408).send(`Request Timeout!`)
