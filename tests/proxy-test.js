@@ -58,22 +58,22 @@ const getData = async (asin, i = 0) => {
 
     // console.log(data)
 
-    // const timeTaken = ((performance.now() - start) / 1000).toFixed(1) + 's'
-    // if (data.meta.captcha) {
-    //   console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Captcha ${timeTaken}`)
-    //   // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Captcha` + '\n')
-    //   await getData(asin, i)
-    // } else if (data.meta.notFound) {
-    //   console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Not Found ${timeTaken}`)
-    //   // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Not Found` + '\n')
-    // } else if (data.name.length === 0) {
-    //   console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Unsuccessful ${timeTaken}`)
-    //   // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Unsuccessful` + '\n')
-    //   await getData(asin, i)
-    // } else {
-    //   console.log(`${i} ${data.name.slice(0, 4)} ${data.average_rating} ${data.availability_status} ${timeTaken}`)
-    //   // writer.write(`${i}` + '\n')
-    // }
+    const timeTaken = ((performance.now() - start) / 1000).toFixed(1) + 's'
+    if (data.meta.captcha) {
+      console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Captcha ${timeTaken}`)
+      // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Captcha` + '\n')
+      await getData(asin, i)
+    } else if (data.meta.notFound) {
+      console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Not Found ${timeTaken}`)
+      // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Not Found` + '\n')
+    } else if (data.name.length === 0) {
+      console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Unsuccessful ${timeTaken}`)
+      // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Unsuccessful` + '\n')
+      await getData(asin, i)
+    } else {
+      console.log(`${i} ${data.name.slice(0, 4)} ${data.average_rating} ${data.availability_status} ${timeTaken}`)
+      // writer.write(`${i}` + '\n')
+    }
 
     if (!data.success) {
       console.log(data)

@@ -163,7 +163,6 @@ app.get('/', async (req, res) => {
       const $ = cheerio.load(response)
       let data = {
         name: $('#productTitle').text().trim() || $('#btAsinTitle').text().trim(),
-        availability_status: $('#availability').text().trim().replace(/\s+/g, ' '), // availabilty status in alternative
         images: [$('#landingImage').attr('src')],
         total_reviews: Number($('#acrCustomerReviewText').text().split(' ')[0].replace(',', '')),
         average_rating: Number($('span[data-hook=rating-out-of-text]').text().split(' ')[0]),
@@ -180,6 +179,8 @@ app.get('/', async (req, res) => {
 
       data = {
         success: data.meta.captcha !== true && data.meta.notFound !== true && data.name.length === 0 ? false : true,
+        availability_status:
+          data.meta.notFound === true ? '404' : $('#availability').text().trim().replace(/\s+/g, ' '),
         ...data,
       }
 
