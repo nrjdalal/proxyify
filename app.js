@@ -178,6 +178,11 @@ app.get('/', async (req, res) => {
         },
       }
 
+      data = {
+        success: data.meta.captcha !== true && data.meta.notFound !== true && data.name.length === 0 ? false : true,
+        ...data,
+      }
+
       res.status(200).json(data)
     } else res.status(200).send(await response.text())
   } catch {

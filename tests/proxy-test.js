@@ -25,7 +25,6 @@ const getData = async (asin, i = 0) => {
     let res = await fetchTimeout(`http://${url}/?url=https://www.amazon.com/dp/${asin}&autoparse=true`)
 
     res = await res.text()
-    console.log(res.slice(0, 50))
 
     let data
 
@@ -52,23 +51,32 @@ const getData = async (asin, i = 0) => {
       }
     }
 
-    console.log('Unsuccessful', data.meta.captcha || data.meta.notFound || !data.name.length ? true : false)
+    data = {
+      success: data.meta.captcha !== true && data.meta.notFound !== true && data.name.length === 0 ? false : true,
+      ...data,
+    }
 
-    const timeTaken = ((performance.now() - start) / 1000).toFixed(1) + 's'
-    if (data.meta.captcha) {
-      console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Captcha ${timeTaken}`)
-      // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Captcha` + '\n')
-      await getData(asin, i)
-    } else if (data.meta.notFound) {
-      console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Not Found ${timeTaken}`)
-      // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Not Found` + '\n')
-    } else if (data.name.length === 0) {
-      console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Unsuccessful ${timeTaken}`)
-      // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Unsuccessful` + '\n')
-      await getData(asin, i)
-    } else {
-      console.log(`${i} ${data.name.slice(0, 4)} ${data.average_rating} ${data.availability_status} ${timeTaken}`)
-      // writer.write(`${i}` + '\n')
+    // console.log(data)
+
+    // const timeTaken = ((performance.now() - start) / 1000).toFixed(1) + 's'
+    // if (data.meta.captcha) {
+    //   console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Captcha ${timeTaken}`)
+    //   // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Captcha` + '\n')
+    //   await getData(asin, i)
+    // } else if (data.meta.notFound) {
+    //   console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Not Found ${timeTaken}`)
+    //   // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Not Found` + '\n')
+    // } else if (data.name.length === 0) {
+    //   console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Unsuccessful ${timeTaken}`)
+    //   // writer.write(`${i} @ https://www.amazon.com/dp/${asin} ~ Unsuccessful` + '\n')
+    //   await getData(asin, i)
+    // } else {
+    //   console.log(`${i} ${data.name.slice(0, 4)} ${data.average_rating} ${data.availability_status} ${timeTaken}`)
+    //   // writer.write(`${i}` + '\n')
+    // }
+
+    if (!data.success) {
+      console.log(data)
     }
   } catch {
     await getData(asin, i)
