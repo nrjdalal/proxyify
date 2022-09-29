@@ -1,4 +1,4 @@
-import { ec2Client, excludeInstance, instanceParams, requestPerProxy } from './config.js'
+import { apiKey, ec2Client, excludeInstance, instanceParams, requestPerProxy } from './config.js'
 import * as AWS from '@aws-sdk/client-ec2'
 import * as cheerio from 'cheerio'
 import express from 'express'
@@ -107,6 +107,10 @@ let i = 0,
 const switchProxies = current.length * requestPerProxy
 
 app.get('/', async (req, res) => {
+  if (req.query.apiKey !== apiKey) {
+    return res.status(404).send('Forbidden')
+  }
+
   // ~ iterate to next proxy
   i++
 
