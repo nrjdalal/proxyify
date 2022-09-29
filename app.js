@@ -161,7 +161,7 @@ app.get('/', async (req, res) => {
     if (req.query.url.includes('amazon') && req.query.autoparse === 'true') {
       response = await response.text()
       const $ = cheerio.load(response)
-      const data = {
+      let data = {
         name: $('#productTitle').text().trim() || $('#btAsinTitle').text().trim(),
         availability_status: $('#availability').text().trim().replace(/\s+/g, ' '), // availabilty status in alternative
         images: [$('#landingImage').attr('src')],
