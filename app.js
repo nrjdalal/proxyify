@@ -191,7 +191,7 @@ app.get('/', async (req, res) => {
       res.status(200).json(data)
     } else res.status(200).send(await response.text())
   } catch {
-    res.status(408).json({ success: 'false', reason: 'Something went wrong!' })
+    res.status(408).json({ success: false, reason: 'Something went wrong!' })
   }
 
   // ~ create next pool of proxies
