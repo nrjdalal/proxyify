@@ -122,7 +122,6 @@ app.get('/', async (req, res) => {
   }
 
   if (current.length === 0) {
-    res.status(408).json({ success: false, reason: 'Initializing!' })
     return
   }
 
