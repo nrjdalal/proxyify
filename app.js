@@ -108,7 +108,7 @@ const switchProxies = current.length * requestPerProxy
 
 app.get('/', async (req, res) => {
   if (req.query.api_key !== api_key) {
-    return res.status(404).send('Forbidden')
+    return res.status(408).json({ success: false, reason: 'Forbidden!' })
   }
 
   // ~ iterate to next proxy
@@ -131,11 +131,10 @@ app.get('/', async (req, res) => {
       await fetchTimeout('https://google.com', { agent: proxyAgent })
       ready = true
       i = 0
-      res.send('Server is ready!')
-      return
+
+      return res.status(404).json({ success: false, reason: 'Server is ready!' })
     } catch {
-      res.send('Server is booting up!')
-      return
+      return res.status(404).json({ success: false, reason: 'Server is booting up!' })
     }
   }
 
