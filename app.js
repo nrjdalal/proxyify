@@ -142,7 +142,7 @@ app.get('/', async (req, res) => {
       i,
       current[i % current.length].PublicIpAddress.split('.')[3],
       req.headers.host,
-      req.query.url.split('/').slice(3).join('/')
+      req.query.url.match(/(?:[/dp/]|$)([A-Z0-9]{10})/)
     )
   }
 
