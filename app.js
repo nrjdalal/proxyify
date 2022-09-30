@@ -138,7 +138,7 @@ app.get('/', async (req, res) => {
 
   // ~ logging every request
   if (!ready || i % current.length === 0) {
-    console.log(i, current[i % current.length].PublicIpAddress)
+    console.log(i, current[i % current.length].PublicIpAddress, req.query.url.split('/').slice(2).join('/'))
   }
 
   // ~ checking server status
