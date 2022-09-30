@@ -12,7 +12,9 @@ let i = 0,
   ready = false,
   create = true,
   current = [],
-  next = []
+  next = [],
+  switchProxies,
+  init = true
 
 // ~ fx -> get all pending and running instances
 const getAll = async () => {
@@ -81,44 +83,45 @@ const fetchTimeout = async (resource, options = {}) => {
   return response
 }
 
-// ~ getting all pending and running instances
-console.log('getting all pending and running instances')
-const allInstances = await getAll()
-await sleep()
-
-// ~ terminating all existing instances
-if (allInstances.length !== 0) {
-  console.log('terminating all existing instances')
-  await terminateInstances(allInstances.map((el) => el.InstanceId))
-  await sleep()
-}
-
-// ~ starting primary instances
-console.log('starting primary instances')
-// await ec2Client.send(new AWS.RunInstancesCommand(instanceParams()))
-await createInstances(instanceParams())
-await sleep()
-
-// ~ associating primary instances with current
-current = await getAll()
-await sleep()
-console.log(current.map((el) => el.PublicIpAddress))
-
-// ~ constants
-const switchProxies = current.length * requestPerProxy
-
 app.get('/', async (req, res) => {
   if (req.query.api_key !== api_key || current.length === 0) {
-    return res.status(408).json({ success: false, reason: 'Try again!' })
+    res.status(408).json({ success: false, reason: 'Access denied!' })
+  }
+
+  if (current.length === 0 && init === true) {
+    init === false
+    // ~ getting all pending and running instances
+    console.log('getting all pending and running instances')
+    const allInstances = await getAll()
+    await sleep()
+
+    // ~ terminating all existing instances
+    if (allInstances.length !== 0) {
+      console.log('terminating all existing instances')
+      await terminateInstances(allInstances.map((el) => el.InstanceId))
+      await sleep()
+    }
+
+    // ~ starting primary instances
+    console.log('starting primary instances')
+    // await ec2Client.send(new AWS.RunInstancesCommand(instanceParams()))
+    await createInstances(instanceParams())
+    await sleep()
+
+    // ~ associating primary instances with current
+    current = await getAll()
+    await sleep()
+    console.log(current.map((el) => el.PublicIpAddress))
+
+    switchProxies = current.length * requestPerProxy
+    return
   }
 
   // ~ iterate to next proxy
   i++
 
-  // ~ currently active proxy
-
-  // ~ logging every 20th request
-  if (!ready || i % 20 === 0) {
+  // ~ logging every request
+  if (!ready || i % current.length === 0) {
     console.log(i, current[i % current.length].PublicIpAddress)
   }
 
@@ -239,9 +242,6 @@ app.get('/', async (req, res) => {
       create = true
     }
   }
-  try {
-    res.status(408).json({ success: false, reason: 'Initializing!' })
-  } catch {}
 })
 
 app.listen(5555)
