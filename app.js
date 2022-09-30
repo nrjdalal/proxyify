@@ -7,6 +7,13 @@ import HttpsProxyAgent from 'https-proxy-agent'
 
 const app = express()
 
+// ~ variables
+let i = 0,
+  ready = false,
+  create = true,
+  current = [],
+  next = []
+
 // ~ fx -> get all pending and running instances
 const getAll = async () => {
   const describeAll = await ec2Client.send(new AWS.DescribeInstancesCommand({}))
@@ -93,22 +100,16 @@ await createInstances(instanceParams())
 await sleep()
 
 // ~ associating primary instances with current
-let current = await getAll()
+current = await getAll()
 await sleep()
 console.log(current.map((el) => el.PublicIpAddress))
-
-// ~ variables
-let i = 0,
-  ready = false,
-  create = true,
-  next = []
 
 // ~ constants
 const switchProxies = current.length * requestPerProxy
 
 app.get('/', async (req, res) => {
-  if (req.query.api_key !== api_key) {
-    return res.status(408).json({ success: false, reason: 'Forbidden!' })
+  if (req.query.api_key !== api_key || current.length === 0) {
+    return res.status(408).json({ success: false, reason: 'Try again!' })
   }
 
   // ~ iterate to next proxy
