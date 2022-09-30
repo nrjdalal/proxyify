@@ -141,7 +141,7 @@ app.get('/', async (req, res) => {
     console.log(
       i,
       current[i % current.length].PublicIpAddress.split('.')[3],
-      req.headers,
+      req.headers.host,
       req.query.url.split('/').slice(3).join('/')
     )
   }
