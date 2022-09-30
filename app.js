@@ -88,7 +88,11 @@ app.get('/', async (req, res) => {
     res.status(408).json({ success: false, reason: 'Access denied!' })
   }
 
-  if (current.length === 0 && init === true) {
+  if (current.length === 0) {
+    res.status(408).json({ success: false, reason: 'Initializing!' })
+  }
+
+  if (init === true) {
     init = false
     // ~ getting all pending and running instances
     console.log('getting all pending and running instances')
