@@ -84,7 +84,7 @@ const fetchTimeout = async (resource, options = {}) => {
 }
 
 app.get('/', async (req, res) => {
-  if (req.query.api_key !== api_key || current.length === 0) {
+  if (req.query.api_key !== api_key) {
     res.status(408).json({ success: false, reason: 'Access denied!' })
   }
 
@@ -114,6 +114,11 @@ app.get('/', async (req, res) => {
     console.log(current.map((el) => el.PublicIpAddress))
 
     switchProxies = current.length * requestPerProxy
+    return
+  }
+
+  if (current.length === 0) {
+    res.status(408).json({ success: false, reason: 'Initializing!' })
     return
   }
 
