@@ -37,18 +37,14 @@ const getData = async (asin, i = 0) => {
     const timeTaken = ((performance.now() - start) / 1000).toFixed(1) + 's'
     if (data.meta.captcha) {
       console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Captcha ${timeTaken}`)
-      await getData(asin, i)
+      // await getData(asin, i)
     } else if (data.meta.notFound) {
       console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Not Found ${timeTaken}`)
     } else if (data.name.length === 0) {
       console.log(`${i} @ https://www.amazon.com/dp/${asin} ~ Unsuccessful ${timeTaken}`)
-      await getData(asin, i)
+      // await getData(asin, i)
     } else {
       console.log(`${i} ${data.name.slice(0, 4)} ${timeTaken}`)
-    }
-
-    if (!data.success) {
-      console.log(data)
     }
   } catch {
     await getData(asin, i)
@@ -65,7 +61,7 @@ let i = 0
 async function load() {
   while (i < asins.length) {
     try {
-      getData(asins[i + 90], i)
+      getData(asins[i], i)
       await timer(750)
       await timer(Math.floor(Math.random() * 500))
     } catch (e) {
