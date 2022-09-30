@@ -238,7 +238,9 @@ app.get('/', async (req, res) => {
       create = true
     }
   }
-  return res.status(408).json({ success: false, reason: 'Initializing!' })
+  try {
+    res.status(408).json({ success: false, reason: 'Initializing!' })
+  } catch {}
 })
 
 app.listen(5555)
