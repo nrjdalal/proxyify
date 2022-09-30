@@ -120,6 +120,10 @@ app.get('/', async (req, res) => {
     await sleep()
     console.log(current.map((el) => el.PublicIpAddress))
 
+    if (current.length === 0) {
+      init = true
+    }
+
     switchProxies = current.length * requestPerProxy
     return
   }
