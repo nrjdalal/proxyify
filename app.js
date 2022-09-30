@@ -89,7 +89,7 @@ app.get('/', async (req, res) => {
   }
 
   if (current.length === 0 && init === true) {
-    init === false
+    init = false
     // ~ getting all pending and running instances
     console.log('getting all pending and running instances')
     const allInstances = await getAll()
