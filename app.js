@@ -7,15 +7,6 @@ import HttpsProxyAgent from 'https-proxy-agent'
 
 const app = express()
 
-// ~ variables
-let i = 0,
-  ready = false,
-  create = true,
-  current = [],
-  next = [],
-  switchProxies,
-  init = true
-
 // ~ fx -> get all pending and running instances
 const getAll = async () => {
   const describeAll = await ec2Client.send(new AWS.DescribeInstancesCommand({}))
@@ -83,9 +74,19 @@ const fetchTimeout = async (resource, options = {}) => {
   return response
 }
 
+// ~ variables
+let i = 0,
+  create = true,
+  current = [],
+  init = true,
+  next = [],
+  ready = false,
+  switchProxies
+
 app.get('/', async (req, res) => {
   if (req.query.api_key !== api_key) {
     res.status(408).json({ success: false, reason: 'Access denied!' })
+    return
   }
 
   if (current.length === 0) {
@@ -93,7 +94,9 @@ app.get('/', async (req, res) => {
   }
 
   if (init === true) {
+    // ~ switch the flag and create instances in background
     init = false
+
     // ~ getting all pending and running instances
     console.log('getting all pending and running instances')
     const allInstances = await getAll()
@@ -121,6 +124,7 @@ app.get('/', async (req, res) => {
     return
   }
 
+  // ~ don't proceed furthur without creating primary
   if (current.length === 0) {
     return
   }
