@@ -93,7 +93,7 @@ app.get('/', async (req, res) => {
     res.status(408).json({ success: false, reason: 'Initializing!' })
   }
 
-  if (init === true) {
+  if (init === true && current.length === 0) {
     // ~ switch the flag and create instances in background
     init = false
 
@@ -120,11 +120,8 @@ app.get('/', async (req, res) => {
     await sleep()
     console.log(current.map((el) => el.PublicIpAddress))
 
-    if (current.length === 0) {
-      init = true
-    }
-
     switchProxies = current.length * requestPerProxy
+    init = true
     return
   }
 
