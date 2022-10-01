@@ -51,3 +51,4 @@ cat >/etc/caddy/Caddyfile <<CADDYFILE
 }
 CADDYFILE
 sudo systemctl reload caddy
+# test run
